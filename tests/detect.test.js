@@ -18,7 +18,8 @@ describe('scorePageText', () => {
     assert.ok(scorePageText(text) < 3);
   });
 
-  it('detects time patterns', () => {
+  it('detects time patterns boosting a keyword match over threshold', () => {
+    // "spettacolo" = +1 keyword, "21:30" = +2 time pattern → total 3
     assert.ok(scorePageText('Spettacolo alle 21:30') >= 3);
   });
 
