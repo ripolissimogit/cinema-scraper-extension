@@ -30,12 +30,18 @@ describe('toCSV', () => {
     const csv = toCSV(records);
     assert.ok(csv.includes('"Film, with comma"'));
   });
+
+  it('escapes double-quotes by doubling them', () => {
+    const records = [{ ...RECORDS[0], film: 'Film "quoted"', showtimes: ['18:00'] }];
+    const csv = toCSV(records);
+    assert.ok(csv.includes('"Film ""quoted"""'));
+  });
 });
 
 describe('toJSON', () => {
-  it('returns valid JSON string', () => {
-    const json = toJSON(RECORDS);
-    assert.doesNotThrow(() => JSON.parse(json));
+  it('returns JSON with correct cinema field', () => {
+    const parsed = JSON.parse(toJSON(RECORDS));
+    assert.equal(parsed[0].cinema, 'Spazio Gloria');
   });
 
   it('preserves showtimes as array', () => {
