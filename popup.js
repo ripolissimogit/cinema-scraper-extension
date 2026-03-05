@@ -29,7 +29,7 @@ function downloadFile(content, filename, mimeType) {
   a.href = url;
   a.download = filename;
   a.click();
-  URL.revokeObjectURL(url);
+  setTimeout(() => URL.revokeObjectURL(url), 100);
 }
 
 function renderTable(records) {
@@ -51,16 +51,22 @@ function renderTable(records) {
   tbody.innerHTML = '';
   for (const r of records) {
     const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td title="${r.cinema}">${r.cinema}</td>
-      <td title="${r.film}">${r.film}</td>
-      <td>${r.date}</td>
-      <td>${r.showtimes.join(', ')}</td>
-    `;
+    const cells = [
+      { title: r.cinema, text: r.cinema },
+      { title: r.film,   text: r.film },
+      { title: null,     text: r.date },
+      { title: null,     text: (r.showtimes ?? []).join(', ') }
+    ];
+    for (const { title, text } of cells) {
+      const td = document.createElement('td');
+      td.textContent = text;
+      if (title !== null) td.setAttribute('title', title);
+      tr.appendChild(td);
+    }
     tbody.appendChild(tr);
   }
 
-  const totalShowtimes = records.reduce((sum, r) => sum + r.showtimes.length, 0);
+  const totalShowtimes = records.reduce((sum, r) => sum + (r.showtimes ?? []).length, 0);
   footer.textContent = `${records.length} film · ${totalShowtimes} spettacoli`;
 }
 
