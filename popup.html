@@ -38,8 +38,7 @@
     }
     .btn-primary { background: #2563eb; color: white; }
     .btn-primary:hover { background: #1d4ed8; }
-    .btn-secondary { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
-    .btn-secondary:hover { background: #e5e7eb; }
+    .btn-sm { padding: 4px 10px; font-size: 0.78rem; }
     .btn-danger { background: #fee2e2; color: #dc2626; }
     .btn-danger:hover { background: #fecaca; }
     #empty {
@@ -48,34 +47,45 @@
       color: #9ca3af;
       font-size: 0.9rem;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.82rem;
-    }
-    th {
+    #content { max-height: 380px; overflow-y: auto; }
+    .domain-section { border-bottom: 2px solid #e5e7eb; }
+    .domain-section:last-child { border-bottom: none; }
+    .domain-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
       background: #f9fafb;
-      text-align: left;
-      padding: 8px 10px;
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: #6b7280;
-      border-bottom: 1px solid #e5e7eb;
       position: sticky;
       top: 0;
+      z-index: 1;
+    }
+    .domain-name {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #374151;
+    }
+    .domain-actions { display: flex; gap: 6px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    th {
+      text-align: left;
+      padding: 6px 10px;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #9ca3af;
+      border-bottom: 1px solid #f3f4f6;
     }
     td {
       padding: 7px 10px;
       border-bottom: 1px solid #f3f4f6;
-      max-width: 120px;
+      max-width: 110px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: #f9fafb; }
-    #tableWrapper { max-height: 320px; overflow-y: auto; }
     footer {
       padding: 8px 16px;
       border-top: 1px solid #e5e7eb;
@@ -91,26 +101,12 @@
   </header>
 
   <div class="actions">
-    <button class="btn-primary" id="downloadCSV">Download CSV</button>
-    <button class="btn-primary" id="downloadJSON">Download JSON</button>
     <button class="btn-danger" id="clearData">Cancella tutto</button>
   </div>
 
   <div id="empty">Nessun dato estratto.<br>Visita una pagina di cinema e clicca il pulsante 🎬.</div>
 
-  <div id="tableWrapper" style="display:none">
-    <table>
-      <thead>
-        <tr>
-          <th>Cinema</th>
-          <th>Film</th>
-          <th>Data</th>
-          <th>Orari</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody"></tbody>
-    </table>
-  </div>
+  <div id="content" style="display:none"></div>
 
   <footer id="footer"></footer>
 
