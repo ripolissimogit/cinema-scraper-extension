@@ -88,6 +88,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
       const data = await response.json();
       const rawText = config.extractText(data);
+      if (!rawText) throw new Error('Il modello ha restituito una risposta vuota');
       const records = parseJSON(rawText);
 
       // Store cumulatively
