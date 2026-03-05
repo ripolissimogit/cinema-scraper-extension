@@ -90,6 +90,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       const rawText = config.extractText(data);
       if (!rawText) throw new Error('Il modello ha restituito una risposta vuota');
       const records = parseJSON(rawText);
+      if (!Array.isArray(records)) throw new Error('Risposta LLM non è un array JSON valido');
 
       // Store cumulatively
       chrome.storage.local.get(['records'], ({ records: existing }) => {
