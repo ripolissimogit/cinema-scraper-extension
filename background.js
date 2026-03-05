@@ -58,18 +58,29 @@ function parseJSON(text) {
   return JSON.parse(cleaned);
 }
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+// Push result back to the tab — avoids MV3 service worker keepalive issues
+function replyToTab(tabId, result) {
+  chrome.tabs.sendMessage(tabId, { type: 'EXTRACT_RESULT', ...result });
+}
+
+chrome.runtime.onMessage.addListener((message, sender) => {
   if (message.type !== 'EXTRACT') return;
 
-  chrome.storage.sync.get(['provider', 'apiKey'], async ({ provider, apiKey }) => {
+  const tabId = sender.tab?.id;
+  if (!tabId) return;
+
+  // Fire-and-forget async work; result is pushed back via tabs.sendMessage
+  (async () => {
+    const { provider, apiKey } = await chrome.storage.sync.get(['provider', 'apiKey']);
+
     if (!provider || !apiKey) {
-      sendResponse({ error: 'API key non configurata. Vai alle impostazioni.' });
+      replyToTab(tabId, { error: 'API key non configurata. Vai alle impostazioni.' });
       return;
     }
 
     const config = LLM_CONFIGS[provider];
     if (!config) {
-      sendResponse({ error: `Provider non supportato: ${provider}` });
+      replyToTab(tabId, { error: `Provider non supportato: ${provider}` });
       return;
     }
 
@@ -82,7 +93,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
       if (!response.ok) {
         const err = await response.text();
-        sendResponse({ error: `API error ${response.status}: ${err.slice(0, 200)}` });
+        replyToTab(tabId, { error: `API error ${response.status}: ${err.slice(0, 200)}` });
         return;
       }
 
@@ -92,18 +103,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       const records = parseJSON(rawText);
       if (!Array.isArray(records)) throw new Error('Risposta LLM non è un array JSON valido');
 
-      // Store cumulatively
-      chrome.storage.local.get(['records'], ({ records: existing }) => {
-        const updated = [...(existing ?? []), ...records];
-        chrome.storage.local.set({ records: updated }, () => {
-          sendResponse({ ok: true, count: records.length });
-        });
-      });
+      const { records: existing } = await chrome.storage.local.get(['records']);
+      const updated = [...(existing ?? []), ...records];
+      await chrome.storage.local.set({ records: updated });
 
+      replyToTab(tabId, { ok: true, count: records.length });
     } catch (err) {
-      sendResponse({ error: err.message });
+      replyToTab(tabId, { error: err.message });
     }
-  });
-
-  return true; // keep channel open for async response
+  })();
 });
