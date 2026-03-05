@@ -71,7 +71,7 @@
     const btn = document.getElementById('cinema-scraper-btn');
     btn.textContent = '⏳ Estrazione…';
     btn.disabled = true;
-    chrome.runtime.sendMessage({ type: 'EXTRACT', text: document.body.innerText });
+    chrome.runtime.sendMessage({ type: 'EXTRACT', text: document.body.innerText, domain: window.location.hostname });
   }
 
   // Receive result pushed back from background service worker

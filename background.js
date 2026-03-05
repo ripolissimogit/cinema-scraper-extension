@@ -106,8 +106,12 @@ chrome.runtime.onMessage.addListener((message, sender) => {
       const records = parseJSON(rawText);
       if (!Array.isArray(records)) throw new Error('Risposta LLM non è un array JSON valido');
 
+      // Override domain with the real hostname from the page
+      const realDomain = message.domain || '';
+      const normalized = records.map(r => ({ ...r, domain: realDomain }));
+
       const { records: existing } = await chrome.storage.local.get(['records']);
-      const updated = [...(existing ?? []), ...records];
+      const updated = [...(existing ?? []), ...normalized];
       await chrome.storage.local.set({ records: updated });
 
       replyToTab(tabId, { ok: true, count: records.length });
