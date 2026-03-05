@@ -16,7 +16,7 @@ const LLM_CONFIGS = {
   openai: {
     url: 'https://api.openai.com/v1/chat/completions',
     buildBody: (text, model) => ({
-      model: model || 'gpt-4o-mini',
+      model: model || 'gpt-4o',
       messages: [{ role: 'user', content: buildPrompt(text) }],
       max_tokens: 2048
     }),
@@ -29,7 +29,8 @@ const LLM_CONFIGS = {
 };
 
 function buildPrompt(pageText) {
-  return `Analizza il seguente testo di una pagina web di un cinema e restituisci un array JSON con gli orari degli spettacoli.
+  const today = new Date().toISOString().slice(0, 10);
+  return `Oggi è ${today}. Analizza il seguente testo di una pagina web di un cinema e restituisci un array JSON con gli orari degli spettacoli.
 
 Ogni elemento dell'array deve avere questa struttura:
 {
@@ -40,10 +41,12 @@ Ogni elemento dell'array deve avere questa struttura:
   "showtimes": ["HH:MM", "HH:MM"]
 }
 
-Regole:
+Regole IMPORTANTI:
 - Restituisci SOLO il JSON, senza testo aggiuntivo, senza markdown
-- Se la data non è specificata esplicitamente, usa il contesto (es. "questa settimana") per dedurla
-- Se non riesci a trovare orari, restituisci un array vuoto []
+- Le date devono essere reali: usa la data odierna (${today}) come riferimento per interpretare "oggi", "domani", "questa settimana"
+- Estrai SOLO orari effettivamente presenti nel testo — non inventare orari
+- Se un dato non è presente nel testo, ometti il record invece di inventarlo
+- Se non trovi orari, restituisci []
 - Raggruppa per film e data
 
 Testo della pagina:
