@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Cinema Scraper</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, sans-serif;
+      width: 420px;
+      min-height: 200px;
+      color: #1a1a1a;
+    }
+    header {
+      background: #2563eb;
+      color: white;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header h1 { font-size: 0.95rem; font-weight: 600; }
+    header a { color: rgba(255,255,255,0.75); font-size: 0.8rem; text-decoration: none; }
+    header a:hover { color: white; }
+    .actions {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    button {
+      padding: 7px 14px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    .btn-primary { background: #2563eb; color: white; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-secondary { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
+    .btn-secondary:hover { background: #e5e7eb; }
+    .btn-danger { background: #fee2e2; color: #dc2626; }
+    .btn-danger:hover { background: #fecaca; }
+    #empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: #9ca3af;
+      font-size: 0.9rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+    th {
+      background: #f9fafb;
+      text-align: left;
+      padding: 8px 10px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #6b7280;
+      border-bottom: 1px solid #e5e7eb;
+      position: sticky;
+      top: 0;
+    }
+    td {
+      padding: 7px 10px;
+      border-bottom: 1px solid #f3f4f6;
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f9fafb; }
+    #tableWrapper { max-height: 320px; overflow-y: auto; }
+    footer {
+      padding: 8px 16px;
+      border-top: 1px solid #e5e7eb;
+      font-size: 0.78rem;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🎬 Cinema Scraper</h1>
+    <a id="optionsLink" href="#">Impostazioni</a>
+  </header>
+
+  <div class="actions">
+    <button class="btn-primary" id="downloadCSV">Download CSV</button>
+    <button class="btn-primary" id="downloadJSON">Download JSON</button>
+    <button class="btn-danger" id="clearData">Cancella tutto</button>
+  </div>
+
+  <div id="empty">Nessun dato estratto.<br>Visita una pagina di cinema e clicca il pulsante 🎬.</div>
+
+  <div id="tableWrapper" style="display:none">
+    <table>
+      <thead>
+        <tr>
+          <th>Cinema</th>
+          <th>Film</th>
+          <th>Data</th>
+          <th>Orari</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <footer id="footer"></footer>
+
+  <script src="popup.js"></script>
+</body>
+</html>
