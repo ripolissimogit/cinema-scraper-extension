@@ -67,21 +67,33 @@
     setTimeout(() => note.remove(), 3500);
   }
 
+  function resetButton() {
+    const btn = document.getElementById('cinema-scraper-btn');
+    if (btn) {
+      btn.textContent = '🎬 Estrai orari';
+      btn.disabled = false;
+    }
+  }
+
+  let extractTimeout = null;
+
   function handleExtract() {
     const btn = document.getElementById('cinema-scraper-btn');
     btn.textContent = '⏳ Estrazione…';
     btn.disabled = true;
+    clearTimeout(extractTimeout);
+    extractTimeout = setTimeout(() => {
+      resetButton();
+      showNotification('Timeout: nessuna risposta dal servizio.', true);
+    }, 35000);
     chrome.runtime.sendMessage({ type: 'EXTRACT', text: document.body.innerText, domain: window.location.hostname });
   }
 
   // Receive result pushed back from background service worker
   chrome.runtime.onMessage.addListener((message) => {
     if (message.type !== 'EXTRACT_RESULT') return;
-    const btn = document.getElementById('cinema-scraper-btn');
-    if (btn) {
-      btn.textContent = '🎬 Estrai orari';
-      btn.disabled = false;
-    }
+    clearTimeout(extractTimeout);
+    resetButton();
     if (message.error) {
       showNotification(`Errore: ${message.error}`, true);
     } else {

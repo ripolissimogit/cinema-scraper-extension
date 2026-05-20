@@ -16,7 +16,7 @@ const LLM_CONFIGS = {
   openai: {
     url: 'https://api.openai.com/v1/chat/completions',
     buildBody: (text, model) => ({
-      model: model || 'gpt-4o',
+      model: model || 'gpt-4o-mini',
       messages: [{ role: 'user', content: buildPrompt(text) }],
       max_tokens: 2048
     }),
@@ -74,7 +74,7 @@ chrome.runtime.onMessage.addListener((message, sender) => {
 
   // Fire-and-forget async work; result is pushed back via tabs.sendMessage
   (async () => {
-    const { provider, apiKey } = await chrome.storage.sync.get(['provider', 'apiKey']);
+    const { provider, apiKey, model } = await chrome.storage.sync.get(['provider', 'apiKey', 'model']);
 
     if (!provider || !apiKey) {
       replyToTab(tabId, { error: 'API key non configurata. Vai alle impostazioni.' });
@@ -88,11 +88,20 @@ chrome.runtime.onMessage.addListener((message, sender) => {
     }
 
     try {
-      const response = await fetch(config.url, {
-        method: 'POST',
-        headers: config.buildHeaders(apiKey),
-        body: JSON.stringify(config.buildBody(message.text))
-      });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+      let response;
+      try {
+        response = await fetch(config.url, {
+          method: 'POST',
+          headers: config.buildHeaders(apiKey),
+          body: JSON.stringify(config.buildBody(message.text, model)),
+          signal: controller.signal
+        });
+      } finally {
+        clearTimeout(timeoutId);
+      }
 
       if (!response.ok) {
         const err = await response.text();
@@ -111,7 +120,10 @@ chrome.runtime.onMessage.addListener((message, sender) => {
       const normalized = records.map(r => ({ ...r, domain: realDomain }));
 
       const { records: existing } = await chrome.storage.local.get(['records']);
-      const updated = [...(existing ?? []), ...normalized];
+      const prev = existing ?? [];
+      const seen = new Set(prev.map(r => `${r.domain}|${r.film}|${r.date}`));
+      const fresh = normalized.filter(r => !seen.has(`${r.domain}|${r.film}|${r.date}`));
+      const updated = [...prev, ...fresh];
       await chrome.storage.local.set({ records: updated });
 
       replyToTab(tabId, { ok: true, count: records.length });
